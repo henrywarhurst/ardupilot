@@ -263,7 +263,7 @@ bool Plane::verify_command(const AP_Mission::Mission_Command& cmd)        // Ret
         return verify_loiter_turns(cmd);
 
     case MAV_CMD_NAV_LOITER_TIME:
-        return verify_loiter_time();
+        return verify_loiter_time(cmd);
 
     case MAV_CMD_NAV_LOITER_TO_ALT:
         return verify_loiter_to_alt(cmd);
@@ -703,11 +703,11 @@ bool Plane::verify_loiter_unlim(const AP_Mission::Mission_Command &cmd)
     return false;
 }
 
-bool Plane::verify_loiter_time()
+bool Plane::verify_loiter_time(const AP_Mission::Mission_Command &cmd)
 {
     bool result = false;
-    // mission radius is always aparm.loiter_radius
-    update_loiter(0);
+    // use radius from cmd.p2, or default to aparm.loiter_radius if 0
+    update_loiter(cmd.p2);
 
     if (loiter.start_time_ms == 0) {
         if (reached_loiter_target() && loiter.sum_cd > 1) {

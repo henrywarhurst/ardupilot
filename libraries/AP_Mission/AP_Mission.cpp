@@ -1134,7 +1134,8 @@ MAV_MISSION_RESULT AP_Mission::mavlink_int_to_mission_cmd(const mavlink_mission_
     break;
 
     case MAV_CMD_NAV_LOITER_TIME:                       // MAV ID: 19
-        cmd.p1 = packet.param1;                         // loiter time in seconds uses all 16 bits, 8bit seconds is too small. No room for radius.
+        cmd.p1 = packet.param1;                         // loiter time in seconds
+        cmd.p2 = fabsf(packet.param3);                  // radius in meters
         cmd.content.location.loiter_ccw = (packet.param3 < 0);
         cmd.content.location.loiter_xtrack = (packet.param4 > 0); // 0 to xtrack from center of waypoint, 1 to xtrack from tangent exit location
         break;
@@ -1650,10 +1651,9 @@ bool AP_Mission::mission_cmd_to_mavlink_int(const AP_Mission::Mission_Command& c
 
     case MAV_CMD_NAV_LOITER_TIME:                       // MAV ID: 19
         packet.param1 = cmd.p1;                         // loiter time in seconds
+        packet.param3 = cmd.p2;                         // radius in meters
         if (cmd.content.location.loiter_ccw) {
-            packet.param3 = -1;
-        } else {
-            packet.param3 = 1;
+            packet.param3 *= -1;
         }
         packet.param4 = cmd.content.location.loiter_xtrack; // 0 to xtrack from center of waypoint, 1 to xtrack from tangent exit location
         break;
